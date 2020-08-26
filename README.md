@@ -1,2 +1,2 @@
 # carMintsML
-Download and Analyze data inside the MINTS CAR - Chevy Volt 
+Download and Analyze data recorded using the MINTS ground vehicle - Chevy Volt 
