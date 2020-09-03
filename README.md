@@ -20,7 +20,7 @@ Once under UTD VPN the YAML(mintsDefinitions.yaml) file needs to be modified. An
 │   ├── <font color="#729FCF"><b>firmware</b></font>
 │   │   └── <font color="#729FCF"><b>dataProcessing</b></font>
 │   │       ├── mintsDefinitions.yaml
-│   │       ├── PS001_palas2Mat.m
+│   │       ├── gps0001.m
 </pre>
 
 Please choose a directory where you need to create the mints data files with the name 'mintsData'. **Make sure to keep a common 'mintsData' for all MINTS Projects**. Then point to the said folder on the yaml file under the label 'dataFolder'. Under the sshPW field, type in the provided SSH password. In most Mints Data packages are resampled within a pre defined period for synchronizing multiple data samples. To do so the data should be resampled to a unique time period. For the palas data and mints Air Monitoring data sources its fit to resample to a period of 30 seconds. As such 30 can be put under timeSpan. An example implimentation of the YAML file is given below and is also given on the Repo. **Since the YAML file in this case contains secure information(SSH PW) please keep the said file external to the GIT Repo.** 
