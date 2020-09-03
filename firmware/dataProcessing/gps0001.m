@@ -11,16 +11,18 @@ display("---------------------MINTS---------------------")
 
 addpath("../functions/*")
 addpath("../functions/YAMLMatlab_0.4.3")
-mintsDefinitions  = ReadYaml('mintsDefinitions.yaml')
+mintsDefinitions  = ReadYaml('/home/teamlary/Documents/mintsDefinitions.yaml');
 
 dataFolder = mintsDefinitions.dataFolder;
-c1PlusID    = mintsDefinitions.c1PlusID;
-timeSpan    = seconds(mintsDefinitions.timeSpan);
+c1PlusID   = mintsDefinitions.c1PlusID;
+airMarID   = mintsDefinitions.airMarID;
+timeSpan   = seconds(mintsDefinitions.timeSpan);
+sshPW      = mintsDefinitions.sshPW;
 
 
 referenceFolder          =  dataFolder + "/reference";
 referenceDotMatsFolder   =  dataFolder + "/referenceMats";
-GPSFolder                =  referenceDotMatsFolder + "/" +c1PlusID ;
+GPSFolder                =  referenceDotMatsFolder + "/carMintsGPS"  ;
 
 
 display(newline)
@@ -34,14 +36,42 @@ display(newline)
 
 %% Syncing Process 
 
-% syncFromCloudLora(gatewayIDs,dataFolder)
+% Needs to be connected to AV 
+syncFromNas(sshPW,referenceFolder)
 
-% going through the lora IDs
-% for loraIDIndex = 1:length(loraIDs)
 
-% loraID = loraIDs{loraIDIndex}; /media/teamlary/teamlary3/air930/mintsData/reference/001e0610c2e7/2020/02/04
+%% Filling in the gaps for lost data 
+% Pre Car GPS  
+dateTime = datetime(2019,01,1,'timezone','utc'):seconds(30):datetime(2019,12,31,'timezone','utc');
+preCarLatitude    = ones([length(dateTime),1])*32.992179;
+preCarLongitude   = ones([length(dateTime),1])*-96.757777;
+preCarGPS = timetable(dateTime',preCarLatitude,preCarLongitude);
+preCarGPS.Properties.VariableNames = {'latitudeCoordinate','longitudeCoordinate'};
+
+% PostCarGPS1 
+dateTime = datetime(2020,06,27,'timezone','utc'):seconds(30):datetime(2020,06,28,'timezone','utc');
+postCarLatitude    = ones([length(dateTime),1])*32.992179;
+postCarLongitude   = ones([length(dateTime),1])*-96.757777;
+postCarGPS1 = timetable(dateTime',postCarLatitude,postCarLongitude);
+postCarGPS1.Properties.VariableNames = {'latitudeCoordinate','longitudeCoordinate'};
+
+
+% PostCarGPS2 - Skipping Server Transport -- Which was done on June 29th 
+dateTime = datetime(2020,06,30,'timezone','utc'):seconds(30):datetime(2020,08,01,'timezone','utc');
+postCarLatitude    = ones([length(dateTime),1])*32.992179;
+postCarLongitude   = ones([length(dateTime),1])*-96.757777;
+postCarGPS2 = timetable(dateTime',postCarLatitude,postCarLongitude);
+postCarGPS2.Properties.VariableNames ={'latitudeCoordinate','longitudeCoordinate'};
+
+
+
+%% Finding Files 
+
 gpggaFiles =  dir(strcat(referenceFolder,'/*/*/*/*/MINTS_',c1PlusID,'_GPSGPGGA','*.csv'))
 gprmcFiles =  dir(strcat(referenceFolder,'/*/*/*/*/MINTS_',c1PlusID,'_GPSGPRMC','*.csv'))
+gpggaAMFiles =  dir(strcat(referenceFolder,'/*/*/*/*/MINTS_',airMarID,'_GPGGA','*.csv'))
+
+
 
 display(" ---- ")
 
@@ -71,7 +101,22 @@ if(length(gprmcFiles) >0)
     end
           
 end  
-    
+%     
+% 
+ %% GPGGA File Record  
+if(length(gpggaAMFiles) >0)
+    parfor fileNameIndex = 1: length(gpggaAMFiles)
+         try
+            display("Reading: "+gpggaAMFiles(fileNameIndex).name+ " " +string(fileNameIndex)) 
+            GPGGAAMData{fileNameIndex} =  gpggaAMRead(strcat(gpggaAMFiles(fileNameIndex).folder,"/",gpggaAMFiles(fileNameIndex).name),timeSpan)
+        catch
+            display("Error With : "+gpggaAMFiles(fileNameIndex).name+"- "+string(fileNameIndex))
+        end   
+    end
+          
+end  
+
+
 display(strcat("Concatinating GPS Data"));
 % 
 concatStr  =  "mintsDataAll = [";
@@ -83,21 +128,35 @@ concatStr  =  "mintsDataAll = [";
      concatStr = strcat(concatStr,"GPSGPRMCData{",string(fileNameIndex),"};");
  end    
  
-concatStr  =  strcat(concatStr,"];");
+ for fileNameIndex = 1: length(gpggaAMFiles)
+     concatStr = strcat(concatStr,"GPGGAAMData{",string(fileNameIndex),"};");
+ end   
+ 
+ %% Filling In the Gaps 
+ 
+concatStr  =  strcat(concatStr,"preCarGPS; postCarGPS2; postCarGPS1;];");
 
 display(concatStr);
 eval(concatStr);
 
 display("Retiming GPS Data");
-mintsData   =  retime(unique(mintsDataAll),'regular',@mean,'TimeStep',timeSpan); 
+mintsData   =  rmmissing(retime(unique(mintsDataAll),'regular',@mean,'TimeStep',timeSpan)); 
 
 
 %% Getting Save Name 
 display("Saving GPS Data");
-saveName  = strcat(GPSFolder,'/carGPS_',c1PlusID,'.mat');
+saveName  = strcat(GPSFolder,'/carMintsGPS.mat');
 folderCheck(saveName)
 save(saveName,'mintsData');
 
+
+%% Functions Used 
+function [] = syncFromNas(sshPW,referenceFolder)
+
+    %% Setup the Import Options and import the data
+    system(strcat("sshpass -p ",sshPW,' rsync -avzrtu -e ssh --include="*.csv" --include="*/" --exclude="*" mintsdata@192.168.1.176:/volume1/MINTSNASCAR/reference/ '," ",referenceFolder))
+
+end
 
 function mintsData = gpggaRead(fileName,timeSpan)
 
@@ -147,6 +206,9 @@ function mintsData = gpggaRead(fileName,timeSpan)
     mintsData.dateTime.TimeZone = "utc";
 
     mintsData   =  retime(table2timetable(mintsData),'regular',@nanmean,'TimeStep',timeSpan);
+    
+    
+    
      %% Clear temporary variables
     clear opts
 
@@ -208,37 +270,76 @@ function mintsData = gprmcRead(fileName,timeSpan)
 end
 
 
-%         display(strcat("Concatinating LoRa data for Node: ",loraID));
-% 
-%         concatStr  =  "mintsDataAll = [";
-% 
-%         for fileNameIndex = 1: length(allFiles)
-%             concatStr = strcat(concatStr,"loraNodeAll{",string(fileNameIndex),"};");
-%         end    
-% 
-%         concatStr  =  strcat(concatStr,"];");
-% 
-%         display(concatStr);
-%         eval(concatStr);
-% 
-%         mintsData = unique(mintsDataAll);
-% 
-%         %% Getting Save Name 
-%         display(strcat("Saving Lora Data for Node: ", loraID));
-%         saveName  = strcat(loraMatsFolder,'/loraMints_',loraID,'.mat');
-%         mkdir(fileparts(saveName));
-%         save(saveName,'mintsData');
-%     else
-%         
-%        display(strcat("No Data for Lora Node: ", loraID ))
-%     end
-%     
-%     
-%     clearvars -except loraIDs loraIDIndex rawFolder dataFolder rawDotMatsFolder loraMatsFolder
-%     
-% %loraID
-% end
 
+%% Import data from text file
+% Script for importing data from the following text file:
+%
+%    filename: /media/teamlary/teamlary1/gitHubRepos/carMintsML/firmware/dataProcessing/MINTS_001e0610c2e9_GPGGA_2020_06_27.csv
+%
+% Auto-generated by MATLAB on 27-Aug-2020 08:12:37
 
+function mintsData = gpggaAMRead(fileName,timeSpan)
+%% Setup the Import Options and import the data
+    opts = delimitedTextImportOptions("NumVariables", 16);
 
+    % Specify range and delimiter
+    opts.DataLines = [2, Inf];
+    opts.Delimiter = ",";
+
+    % Specify column names and types
+    opts.VariableNames = ["dateTime", "UTCTimeStamp", "latitude", "latDirection", "longitude", "lonDirection", "gpsQuality", "numberOfSatellites", "horizontalDilution", "altitude", "AUnits", "geoidalSeparation", "GSUnits", "ageOfDifferential", "stationID", "checkSum"];
+    opts.VariableTypes = ["datetime", "double", "double", "categorical", "double", "categorical", "double", "double", "double", "double", "categorical", "double", "categorical", "string", "string", "double"];
+
+    % Specify file level properties
+    opts.ExtraColumnsRule = "ignore";
+    opts.EmptyLineRule = "read";
+
+    % Specify variable properties
+    opts = setvaropts(opts, ["ageOfDifferential", "stationID"], "WhitespaceRule", "preserve");
+    opts = setvaropts(opts, ["latDirection", "lonDirection", "AUnits", "GSUnits", "ageOfDifferential", "stationID"], "EmptyFieldRule", "auto");
+    opts = setvaropts(opts, "dateTime", "InputFormat", "yyyy-MM-dd HH:mm:ss.SSS");
+
+    % Import the data
+    mintsData = readtable(fileName, opts);
+    
+    mintsData.dateTime.TimeZone = "utc";
+
+        
+    % Conversion to Coordinates 
+    mintsData.latitudeCoordinate = floor(mintsData.latitude/100)+ rem(mintsData.latitude,100)/60 ;
+    if mintsData.latDirection == 'S'
+        mintsData.latitudeCoordinate= mintsData.latitudeCoordinate *-1; 
+    end
+    mintsData.longitudeCoordinate = floor(mintsData.longitude/100)+ rem(mintsData.longitude,100)/60 ;
+    if mintsData.lonDirection == 'W'
+        mintsData.longitudeCoordinate= mintsData.longitudeCoordinate *-1; 
+    end
+    
+    
+    mintsData = removevars( mintsData,{...    
+                      'latitude'          ,...
+                      'latDirection'      ,...
+                      'longitude'         ,...
+                      'lonDirection'      ,...
+                     'UTCTimeStamp'      ,...
+                     'gpsQuality'        ,...
+                     'numberOfSatellites',...
+                     'horizontalDilution',...
+                     'altitude'          ,...
+                     'AUnits'            ,...
+                     'geoidalSeparation' ,...
+                     'GSUnits'           ,...
+                     'ageOfDifferential' ,...
+                     'stationID'         ,...
+                     'checkSum'          ...
+                                    });
+    mintsData   =  retime(table2timetable(mintsData),'regular',@nanmean,'TimeStep',timeSpan);
+
+    %% Clear temporary variables
+    clear opts
+
+    
+    
+    
+end
 

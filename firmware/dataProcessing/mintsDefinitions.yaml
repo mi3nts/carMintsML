@@ -2,6 +2,8 @@
 dataFolder: "/media/teamlary/teamlary3/air930/mintsData"
 
 c1PlusID: "001e0610c2e7"
-
+airMarID: "001e0610c2e9"
 
 timeSpan: 30
+
+sshPW: "PW" 
