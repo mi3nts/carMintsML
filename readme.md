@@ -3,6 +3,9 @@ Download and Analyze data recorded using the MINTS ground vehicle - Chevy Volt
 
 
 ## Operation Pre Requisites 
+
+### Rsync 
+The code needs rsync installed on your PC. ```sudo apt install rsync grsync```
 ### UTD VPN 
 Inorder to download the data,We need to be get access to the NAS Drive. If running this code off site you need to be within a UTD VPN. The instuctions on being under UTD VPN can be found [here](https://www.utdallas.edu/oit/howto/vpn/).
 
