@@ -5,7 +5,8 @@ Download and Analyze data recorded using the MINTS ground vehicle - Chevy Volt
 ## Operation Pre Requisites 
 
 ### Rsync 
-The code needs rsync installed on your PC. ```sudo apt install rsync grsync```
+The code needs rsync installed on your PC. 
+```sudo apt install rsync grsync```
 
 ### UTD VPN 
 Inorder to download the data,We need to be get access to the NAS Drive. If running this code off site you need to be within a UTD VPN. The instuctions on being under UTD VPN can be found [here](https://www.utdallas.edu/oit/howto/vpn/).
@@ -36,12 +37,14 @@ airMarID: "001e0610c2e9"
 timeSpan: 30
 sshPW: "PW" 
 ```
-Once the YAML file is updated you can run the 'gps0001.m' file under matlab **(Make sure you point to the proper YAML file on the matlab script)**. This should result in creating a .mat file which concatinates all GPS files from the Mints Ground Vehicle. The file is named 'carMintsGPS.mat' and can be found within the folder structure described below.
+Once the YAML file is updated you can run the 'gps0001.m' file under matlab **(Make sure you point to the proper YAML file on the matlab script)**. This should result in creating two .mat file which concatinates all GPS files from the Mints Ground Vehicle. The said files can be found within the folder structure described below.
 
 <pre>── <font color="#729FCF"><b>mintsData</b></font>
 │   ├── <font color="#729FCF"><b>referenceMats</b></font>
 │   │   └── <font color="#729FCF"><b>carMintsGPS</b></font>
-│   │       ├── carMintsGPS.mat
+│   │       ├── carMintsGPSAll.mat
+│   │       ├── carMintsGPSCoords.mat
 
 </pre>
-The 'carMintsGPS.mat' files contains latititue, longitude cordinate data with its respective date time values. 
+The 'carMintsGPS.mat' files contains latititue, longitude cordinate data with its respective date time values while the 'carMintsGPSAll.mat' includes the additional parametors of *altitude* and *sensor*.
+
