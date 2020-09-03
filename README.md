@@ -6,7 +6,7 @@ Download and Analyze data recorded using the MINTS ground vehicle - Chevy Volt
 ### UTD VPN 
 Inorder to download the data,We need to be get access to the NAS Drive. If running this code off site you need to be within a UTD VPN. The instuctions on being under UTD VPN can be found [here](https://www.utdallas.edu/oit/howto/vpn/).
 
-#### Example shell script to get NAS Drive data under VPN  
+#### Example shell script to get NAS Drive data under in its raw form under VPN  
 
 ```
 sshpass -p NASDRIVE_SSH_PW rsync -avzrtu -e ssh --include="*.csv" --include="*/" --exclude="*" mintsdata@10.173.45.235:/volume1/MINTSNASCAR/reference/ /media/teamlary/teamlary3/air930/mintsData/reference
