@@ -21,7 +21,7 @@ sshpass -p NASDRIVE_SSH_PW rsync -avzrtu -e ssh --include="*.csv" --include="*/"
 ## Operation
 
 Once under UTD VPN the YAML(mintsDefinitions.yaml) file needs to be modified. An example YAML File is given below 
-<pre>── <font color="#729FCF"><b>palasAirML</b></font>
+<pre>── <font color="#729FCF"><b>carMintsML</b></font>
 │   ├── <font color="#729FCF"><b>firmware</b></font>
 │   │   └── <font color="#729FCF"><b>dataProcessing</b></font>
 │   │       ├── mintsDefinitions.yaml
