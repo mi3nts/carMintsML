@@ -6,4 +6,6 @@ airMarID: "001e0610c2e9"
 
 timeSpan: 30
 
-sshPW: "PW" 
+sshPW: "PW"
+
+nasIP:"10.173.44.20" 
