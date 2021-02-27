@@ -41,7 +41,6 @@ np2Files =  dir(strcat(referenceFolder,'/*/*/*/*/MINTS_',c1PlusID,'_NP2','*.csv'
 
 %% GPSGPGGA File Record
 if(length(np2Files) >0)
-    
     parfor fileNameIndex = 1: length(np2Files)
         try
             display("Reading: "+np2Files(fileNameIndex).name+"- "+string(fileNameIndex))
