@@ -34,17 +34,27 @@ function mintsData = gpggaAMRead(fileName,timeSpan)
 
         
     % Conversion to Coordinates 
-    mintsData.latitudeCoordinate = floor(mintsData.latitude/100)+ rem(mintsData.latitude,100)/60 ;
-    if mintsData.latDirection == 'S'
-        mintsData.latitudeCoordinate= mintsData.latitudeCoordinate *-1; 
-    end
-    mintsData.longitudeCoordinate = floor(mintsData.longitude/100)+ rem(mintsData.longitude,100)/60 ;
-    if mintsData.lonDirection == 'W'
-        mintsData.longitudeCoordinate= mintsData.longitudeCoordinate *-1; 
-    end
-    
-    
-    mintsData = removevars( mintsData,{...    
+%     mintsData.latitudeCoordinate = floor(mintsData.latitude/100)+ rem(mintsData.latitude,100)/60 ;
+%     if mintsData.latDirection == 'S'
+%         mintsData.latitudeCoordinate= mintsData.latitudeCoordinate *-1; 
+%     end
+%     mintsData.longitudeCoordinate = floor(mintsData.longitude/100)+ rem(mintsData.longitude,100)/60 ;
+%     if mintsData.lonDirection == 'W'
+%         mintsData.longitudeCoordinate= mintsData.longitudeCoordinate *-1; 
+%     end
+%     
+
+mintsData.latitudeCoordinate      =  floor(mintsData.latitude/100) + ...
+                (mintsData.latitude - 100*(floor(mintsData.latitude/100)))/60;
+mintsData.latitudeCoordinate = power(-1,mintsData.latDirection=="S").*mintsData.latitudeCoordinate  ;
+
+mintsData.longitudeCoordinate     =  floor(mintsData.longitude/100) + ...
+                (mintsData.longitude - 100*(floor(mintsData.longitude/100)))/60;
+mintsData.longitudeCoordinate = power(-1,mintsData.lonDirection=="W").*mintsData.longitudeCoordinate  ;
+
+
+
+mintsData = removevars( mintsData,{...    
                       'latitude'          ,...
                       'latDirection'      ,...
                       'longitude'         ,...

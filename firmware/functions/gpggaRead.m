@@ -24,7 +24,8 @@ function mintsData = gpggaRead(fileName,timeSpan)
 
     % Import the data
     mintsData = readtable(fileName, opts);
-      
+    
+    
            
     mintsData = removevars( mintsData,{...    
                    'timestamp'          ,...

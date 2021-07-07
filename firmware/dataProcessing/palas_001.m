@@ -5,10 +5,11 @@ close all
 display(newline)
 display("---------------------MINTS---------------------")
 
-addpath("../../functions/")
+addpath("../functions/")
+addpath("../functions/YAMLMatlab_0.4.3")
 
 addpath("YAMLMatlab_0.4.3")
-mintsDefinitions  =  ReadYaml('/home/teamlary/Documents/mintsDefinitions.yaml');
+mintsDefinitions  =  ReadYaml('/home/teamlary/Documents/mintsDefinitions2021.yaml');
 
 dataFolder          = mintsDefinitions.dataFolder;
 driveReferenceLabel = mintsDefinitions.driveReferenceLabel;
@@ -30,6 +31,7 @@ display("Reference DotMat Data Located @ :"+ referenceMatsFolder)
 display("Palas Raw Data Located @ :"+ palasFolder)
 display("Palas DotMat Data Located @ :"+ palasMatsFolder)
 display("Google Drive Reference Label :"+ driveSyncFolder)
+display("Time Span :"+ string(timeSpan) )
 
 
 
@@ -106,7 +108,7 @@ palasDataAll.Properties.VariableNames= {'pm1_palas',...
 % Retiming with old data  
 display("Retiming with Old Palas Data")
 palas  = rmmissing(retime(sortrows([palasDataAll;palasStream; palasDataNow]),'regular',@mean,'TimeStep',timeSpan));
-saveNamePalas      = strcat(palasMatsFolder,"/palas.mat");
+saveNamePalas      = strcat(palasMatsFolder,"/palas_30Sec.mat");
 
 
 folderCheck(saveNamePalas)

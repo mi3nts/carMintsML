@@ -32,7 +32,8 @@ display(newline)
 %% Syncing Process 
 
 % Needs to be connected to AV 
-% syncFromNas(sshPW,nasIP,referenceFolder)
+
+% syncFromNasRef(sshPW,nasIP,referenceFolder)
 
 
 %% Finding Files 

@@ -32,7 +32,7 @@ display(newline)
 %% Syncing Process
 
 % Needs to be connected to AV
-syncFromNas(sshPW,nasIP,referenceFolder)
+syncFromNasRef(sshPW,nasIP,referenceFolder)
 
 
 %% Finding Files
@@ -41,7 +41,6 @@ bcFiles =  dir(strcat(referenceFolder,'/*/*/*/*/MINTS_',c1PlusID,'_2B-BC','*.csv
 
 %% GPSGPGGA File Record
 if(length(bcFiles) >0)
-    
     parfor fileNameIndex = 1: length(bcFiles)
         try
             display("Reading: "+bcFiles(fileNameIndex).name+"- "+string(fileNameIndex))

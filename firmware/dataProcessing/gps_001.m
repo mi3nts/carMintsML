@@ -1,9 +1,27 @@
-%% GPS Data Record 
+% # ***************************************************************************
+% #   ---------------------------------
+% #   Written by: Lakitha Omal Harindha Wijeratne
+% #   - for -
+% #   Mints: Multi-scale Integrated Sensing and Simulation
+% #   & 
+% #   TRECIS: Texas Research and Education Cyberinfrastructure Services  
+% #   ---------------------------------
+% #   Date: June 19th, 2021
+% #   ---------------------------------
+% #   This module is written for generic implimentation of MINTS projects
+% #   --------------------------------------------------------------------------
+% #   https://github.com/mi3nts
+% #   http://utdmints.info/
+% #   https://trecis.cyberinfrastructure.org/
+% #   http://mintswiki.trecis.cloud/
+% #   
+% #   Contact: 
+% #      email: lhw150030@utdallas.edu 
+% # ***************************************************************************
+% #  GPS_0001 - GPS Reader for the Mints Ground Vehicle 
+% #  Creates a signle .mat file encapsulating all of GPS 
+% #  data collected by the car
 
-% Written bt Lakitha Wijeratne for MINTS 
-
-% The following complies all GPS data from the car 
-% and compliles them to one .mat file 
 
 clc ; close all ; clear all 
 
@@ -14,7 +32,7 @@ addpath("../functions/")
 addpath("../functions/YAMLMatlab_0.4.3")
 
 % Make sure to edit the YAML File 
-mintsDefinitions  = ReadYaml('/home/teamlary/Documents/mintsDefinitions.yaml');
+mintsDefinitions  = ReadYaml('/home/teamlary/Documents/mintsDefinitions2021.yaml');
 
 dataFolder = mintsDefinitions.dataFolder;
 c1PlusID   = mintsDefinitions.c1PlusID;
@@ -27,7 +45,7 @@ nasIP      = mintsDefinitions.nasIP;
 referenceFolder          =  dataFolder + "/reference";
 rawFolder                =  dataFolder + "/raw";
 referenceDotMatsFolder   =  dataFolder + "/referenceMats";
-GPSFolder                =  referenceDotMatsFolder + "/carMintsGPS"  ;
+GPSFolder                =  referenceDotMatsFolder + "/carGPS"  ;
 
 display(newline)
 display("Data Folder Located @:"+ dataFolder)
@@ -40,7 +58,8 @@ display(newline)
 %% Syncing Process 
 
 % Needs to be connected to AV 
-syncFromNas(sshPW,nasIP,referenceFolder,rawFolder)
+syncFromNasRef(sshPW,nasIP,referenceFolder)
+syncFromNasRaw(sshPW,nasIP,rawFolder)
 
 %% Deleting data from an old XU4 ID 
 
@@ -146,10 +165,10 @@ end
 
  %% GPGGA File Record  *(Airmar 1)
 if(length(gpggaAMFiles) >0)
-    parfor fileNameIndex = 1: length(gpggaAMFiles)
+   for fileNameIndex = 1: length(gpggaAMFiles)
          try
             display("Reading: "+gpggaAMFiles(fileNameIndex).name+ " " +string(fileNameIndex)) 
-            GPGGAAMData{fileNameIndex} =  gpggaAMRead(strcat(gpggaAMFiles(fileNameIndex).folder,"/",gpggaAMFiles(fileNameIndex).name),timeSpan)
+            GPGGAAMData{fileNameIndex} =  gpggaAMRead(strcat(gpggaAMFiles(fileNameIndex).folder,"/",gpggaAMFiles(fileNameIndex).name),timeSpan);
         catch
             display("Error With : "+gpggaAMFiles(fileNameIndex).name+"- "+string(fileNameIndex))
         end   
@@ -160,10 +179,10 @@ end
  %% airmar File Record  (Airmar 2 )
  
  if(length(gpggaAM2Files) >0)
-    parfor fileNameIndex = 1:length(gpggaAM2Files)
+    for fileNameIndex = 1:length(gpggaAM2Files)
          try
             display("Reading: "+gpggaAM2Files(fileNameIndex).name+ " " +string(fileNameIndex)) 
-            GPGGAAM2Data{fileNameIndex} =  gpggaAMRead(strcat(gpggaAM2Files(fileNameIndex).folder,"/",gpggaAM2Files(fileNameIndex).name),timeSpan)
+            GPGGAAM2Data{fileNameIndex} =  gpggaRawRead(strcat(gpggaAM2Files(fileNameIndex).folder,"/",gpggaAM2Files(fileNameIndex).name),timeSpan);
         catch
             display("Error With : "+gpggaAM2Files(fileNameIndex).name+"- "+string(fileNameIndex))
         end   
@@ -207,14 +226,14 @@ mintsData   =  rmmissing(retime(removevars( mintsDataAll,{'sensor','altitude'}),
 
 %% CHANGE WHEN TESTING 
 display("Saving GPS Data");
-saveName  = strcat(GPSFolder,'/carMintsGPSAll_TEST.mat');
+saveName  = strcat(GPSFolder,'/carGPS_30Sec.mat');
 folderCheck(saveName)
 save(saveName,'mintsDataAll');
 
 
 %% Getting Save Name 
 display("Saving GPS Data");
-saveName  = strcat(GPSFolder,'/carMintsGPSCoords_TEST.mat');
+saveName  = strcat(GPSFolder,'/carGPSCoords_30Sec.mat');
 folderCheck(saveName)
 save(saveName,'mintsData');
 
